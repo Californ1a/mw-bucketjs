@@ -2,6 +2,7 @@
 	"name": "mw-bucketjs",
 	"module": "index.ts",
 	"type": "module",
+	"license": "MIT",
 	"scripts": {
 		"build": "bun build ./index.ts --outdir ./dist --target browser --minify",
 		"test": "bun test"

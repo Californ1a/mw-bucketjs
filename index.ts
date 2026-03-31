@@ -1,17 +1,17 @@
 type RowFor<TFields extends string> = Record<TFields, unknown>;
 type Raw = { __raw: true; value: string };
 type Operand = '=' | '!=' | '>=' | '<=' | '>' | '<';
-type Condition = 
+type Condition<TField = string> = 
 	| `Category:${string}`
-	| [string, string | number]
-	| [string, Operand, string | number]
-	| Raw;
+	| Raw
+	| [TField, string | number]
+	| [TField, Operand, string | number];
 type BucketFn = {
 	(name: string): BucketQuery;
 
-	Or: (...conds: Condition[]) => Raw;
-	And: (...conds: Condition[]) => Raw;
-	Not: (cond: Condition) => Raw;
+	Or: (...conds: Condition<string>[]) => Raw;
+	And: (...conds: Condition<string>[]) => Raw;
+	Not: (cond: Condition<string>) => Raw;
 	Null: () => Raw;
 };
 
@@ -23,15 +23,15 @@ class BucketQuery<TFields extends string = never> {
 		this.bucketName = bucketName;
 	}
 
-	select<const TNewFields extends string>(
-		...fields: TNewFields[]
+	select<const TNewFields extends readonly string[]>(
+		...fields: TNewFields
 	): BucketQuery<TFields | TNewFields[number]> {
 		const args = fields.map(v => `'${v}'`).join(',');
 		this.parts.push(`select(${args})`);
 		return this as unknown as BucketQuery<TFields | TNewFields[number]>;
 	}
 
-	where(...conditions: Condition[]) {
+	where(...conditions: Condition<TFields>[]) {
 		const conds = conditions.map(serializeCondition).join(',');
 		this.parts.push(`where(${conds})`);
 		return this;
@@ -52,8 +52,8 @@ class BucketQuery<TFields extends string = never> {
 		return this;
 	}
 
-	orderBy(selector: string, dir: string) {
-		this.parts.push(`orderBy('${selector}','${dir}')`);
+	orderBy(field: TFields, dir: 'desc' | 'asc') {
+		this.parts.push(`orderBy('${field}','${dir}')`);
 		return this;
 	}
 
@@ -96,7 +96,7 @@ class BucketQuery<TFields extends string = never> {
 	}
 }
 
-function serializeCondition(cond: Condition) {
+function serializeCondition(cond: Condition<string>) {
 	if (typeof cond === 'string') {
 		return `'${cond}'`;
 	}

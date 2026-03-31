@@ -8,6 +8,12 @@ Library mimicks lua usage, with the exception of lua tables replaced by js array
 ```js
 import bucket from 'mw-bucketjs';
 
+// When used outside mediawiki, specify server and script path:
+bucket.Config({
+	wgServer: 'https://runescape.wiki',
+	wgScriptPath: '',
+});
+
 const query = bucket('character')
 	.select('page_name', 'id', 'image', 'release_timestamp')
 	.where(
@@ -15,11 +21,11 @@ const query = bucket('character')
 		['release_timestamp', '<', 1774000000000]
 	)
 	.orderBy('release_timestamp', 'asc')
-	.limit(10);
+	.limit(3);
 
 // Returns the string for the query:
 const queryString = query.build();
-// "bucket('character').select('page_name','id','image','release_timestamp').where(bucket.Not('Category:Beta content'),{'release_timestamp','<',1774000000000}).orderBy('release_timestamp','asc').limit(10)"
+// "bucket('character').select('page_name','id','image','release_timestamp').where(bucket.Not('Category:Beta content'),{'release_timestamp','<',1774000000000}).orderBy('release_timestamp','asc').limit(3)"
 
 // Sends the api request and returns the bucket data:
 const data = await query.run();

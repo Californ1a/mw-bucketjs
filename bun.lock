@@ -9,7 +9,7 @@
         "types-mediawiki": "^2.0.0",
       },
       "peerDependencies": {
-        "typescript": "^5",
+        "typescript": "^5.9.3",
       },
     },
   },

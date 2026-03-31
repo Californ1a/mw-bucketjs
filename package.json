@@ -1,17 +1,17 @@
 {
 	"name": "mw-bucketjs",
 	"module": "index.ts",
-	"type": "module",
-	"license": "MIT",
-	"scripts": {
-		"build": "bun build ./index.ts --outdir ./dist --target browser --minify",
-		"test": "bun test"
-	},
 	"devDependencies": {
 		"@types/bun": "latest",
 		"types-mediawiki": "^2.0.0"
 	},
 	"peerDependencies": {
 		"typescript": "^5.9.3"
-	}
+	},
+	"license": "MIT",
+	"scripts": {
+		"build": "bun build ./index.ts --outdir ./dist --target browser --minify",
+		"test": "bun test"
+	},
+	"type": "module"
 }

@@ -6,8 +6,15 @@ type Condition<TField = string> =
 	| Raw
 	| [TField, string | number]
 	| [TField, Operand, string | number];
+type BucketConfig = {
+	wgServer?: string;
+	wgScriptPath?: string;
+	apiPath?: string;
+}
 type BucketFn = {
 	(name: string): BucketQuery;
+
+	Config: (config: BucketConfig) => void;
 
 	Or: (...conds: Condition<string>[]) => Raw;
 	And: (...conds: Condition<string>[]) => Raw;
@@ -15,12 +22,21 @@ type BucketFn = {
 	Null: () => Raw;
 };
 
+const defaultConfig: Required<BucketConfig> = {
+	wgServer: '',
+	wgScriptPath: '',
+	apiPath: '/api.php',
+}
+let currentConfig = { ...defaultConfig };
+
 class BucketQuery<TFields extends string = never> {
 	private bucketName: string;
 	private parts: string[] = [];
+	private currentConfig: Required<BucketConfig>;
 
 	constructor(bucketName: string) {
 		this.bucketName = bucketName;
+		this.currentConfig = { ...currentConfig };
 	}
 
 	select<const TNewFields extends readonly string[]>(
@@ -66,7 +82,7 @@ class BucketQuery<TFields extends string = never> {
 		try {
 			let data;
 			if (typeof mw === 'undefined' && typeof fetch === 'function') {
-				const res = await fetch('/api.php', {
+				const res = await fetch(getApiUrl(this.currentConfig), {
 					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json'
@@ -118,8 +134,21 @@ function raw(value: string): Raw {
 	return { __raw: true, value }
 }
 
+function getApiUrl(config?: Required<BucketConfig>) {
+	config = config || currentConfig;
+	if (config.apiPath.startsWith('http')) {
+		return config.apiPath;
+	}
+
+	return `${config.wgServer}${config.wgScriptPath}${config.apiPath}`;
+}
+
 const bucket: BucketFn = function(name) {
 	return new BucketQuery(name);
+};
+
+bucket.Config = (config) => {
+	currentConfig = { ...currentConfig, ...config };
 };
 
 bucket.Or = (...conds) => {

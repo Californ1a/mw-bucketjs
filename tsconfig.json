@@ -1,14 +1,11 @@
 {
-	"include": [
-		"./node_modules/types-mediawiki/index.d.ts"
-	],
 	"compilerOptions": {
 		// Environment setup & latest features
-		"lib": ["es6"],
+		"lib": ["es6", "dom"],
 		"target": "es6",
+		"types": ["bun", "types-mediawiki"],
 		"module": "Preserve",
 		"moduleDetection": "force",
-		"jsx": "react-jsx",
 		"allowJs": true,
 
 		// Bundler mode

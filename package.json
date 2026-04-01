@@ -10,7 +10,7 @@
 	},
 	"license": "MIT",
 	"scripts": {
-		"build": "bun build ./index.ts --outdir ./dist --target browser --minify --format cjs",
+		"build": "bun build ./browser.ts --outdir ./dist --target browser --minify --format cjs",
 		"test": "bun test"
 	},
 	"type": "module"

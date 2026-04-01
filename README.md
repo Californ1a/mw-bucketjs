@@ -4,7 +4,9 @@ Javascript wrapper for creating Bucket query strings.
 ## Usage
 Refer to lua usage: https://meta.weirdgloop.org/w/Extension:Bucket/Usage
 
-Library mimicks lua usage, with the exception of lua tables replaced by js arrays.
+Library mimicks lua usage, with the exception of lua tables replaced by js arrays, and `.run()` returning a Promise.
+
+### Module
 ```js
 import bucket from 'mw-bucketjs';
 
@@ -34,6 +36,16 @@ const data = await query.run();
 //   {"page_name": "Luke", "id": 2, "image": "File:Luke.png", "release_timestamp": 1772000000000},
 //   {"page_name": "Jane", "id": 3, "image": "File:Jane.png", "release_timestamp": 1773000000000},
 // ]
+```
+
+### CDN
+```js
+mw.loader.getScript('//cdn.jsdelivr.net/gh/Californ1a/mw-bucketjs/dist/browser.js').then(() => {
+	// Loaded bucketjs, attached to mw:
+	const query = mw.bucket('character')
+		.select('page_name', 'id')
+		...
+});
 ```
 
 ## Dev

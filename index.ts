@@ -1,20 +1,27 @@
 type RowFor<TFields extends string> = Record<TFields, unknown>;
 type Raw = { __raw: true; value: string };
 type Operand = '=' | '!=' | '>=' | '<=' | '>' | '<';
+type ConditionValue = string | number | null;
 type Condition<TField = string> = 
 	| `Category:${string}`
 	| Raw
-	| [TField, string | number | null]
-	| [TField, Operand, string | number | null];
+	| [TField, ConditionValue]
+	| [TField, Operand, ConditionValue];
 type BucketConfig = {
-	wgServer?: string;
-	wgScriptPath?: string;
-	apiPath?: string;
+	wgServer: string;
+	wgScriptPath: string;
+	apiPath: string;
 }
+type BucketConfigInput = {
+	wgServer: string;
+	wgScriptPath: string;
+} | {
+	apiPath: string;
+};
 type BucketFn = {
 	(name: string): BucketQuery;
 
-	Config: (config: BucketConfig) => void;
+	Config: (config: BucketConfigInput) => void;
 
 	Or: (...conds: Condition<string>[]) => Raw;
 	And: (...conds: Condition<string>[]) => Raw;
@@ -22,7 +29,7 @@ type BucketFn = {
 	Null: () => null;
 };
 
-const defaultConfig: Required<BucketConfig> = {
+const defaultConfig: BucketConfig = {
 	wgServer: '',
 	wgScriptPath: '',
 	apiPath: '/api.php',
@@ -32,7 +39,7 @@ let currentConfig = { ...defaultConfig };
 class BucketQuery<TFields extends string = never> {
 	private bucketName: string;
 	private parts: string[] = [];
-	private currentConfig: Required<BucketConfig>;
+	private currentConfig: BucketConfig;
 
 	constructor(bucketName: string) {
 		this.bucketName = bucketName;
@@ -153,7 +160,7 @@ const bucket: BucketFn = function(name) {
 };
 
 bucket.Config = (config) => {
-	currentConfig = { ...currentConfig, ...config };
+	currentConfig = { ...defaultConfig, ...config };
 };
 
 bucket.Or = (...conds) => {

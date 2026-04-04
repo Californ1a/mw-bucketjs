@@ -4,8 +4,8 @@ type Operand = '=' | '!=' | '>=' | '<=' | '>' | '<';
 type Condition<TField = string> = 
 	| `Category:${string}`
 	| Raw
-	| [TField, string | number]
-	| [TField, Operand, string | number];
+	| [TField, string | number | null]
+	| [TField, Operand, string | number | null];
 type BucketConfig = {
 	wgServer?: string;
 	wgScriptPath?: string;
@@ -19,7 +19,7 @@ type BucketFn = {
 	Or: (...conds: Condition<string>[]) => Raw;
 	And: (...conds: Condition<string>[]) => Raw;
 	Not: (cond: Condition<string>) => Raw;
-	Null: () => Raw;
+	Null: () => null;
 };
 
 const defaultConfig: Required<BucketConfig> = {
@@ -119,7 +119,12 @@ function serializeCondition(cond: Condition<string>) {
 
 	if (Array.isArray(cond)) {
 		const condParts = cond.map(v => {
-			return (typeof v === 'string') ? `'${v}'` : v;
+			if (v === null) {
+				return 'bucket.Null()';
+			} else if (typeof v === 'string') {
+				return `'${v}'`;
+			}
+			return v;
 		});
 		return `{${condParts.join(',')}}`;
 	}
@@ -161,7 +166,7 @@ bucket.Not = (cond) => {
 	return raw(`bucket.Not(${serializeCondition(cond)})`);
 };
 bucket.Null = () => {
-	return raw(`bucket.Null()`);
+	return null;
 };
 
 export default bucket;

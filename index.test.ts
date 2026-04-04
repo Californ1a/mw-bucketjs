@@ -79,8 +79,15 @@ describe('conditions', () => {
 	test('null condition', () => {
 		const q = bucket('users')
 			.select('id', 'name')
-			.where(bucket.Null());
-		expect(q.build()).toBe(`bucket('users').select('id','name').where(bucket.Null()).run()`);
+			.where(['id', '!=', bucket.Null()]);
+		expect(q.build()).toBe(`bucket('users').select('id','name').where({'id','!=',bucket.Null()}).run()`);
+	});
+
+	test('literal null condition', () => {
+		const q = bucket('users')
+			.select('id', 'name')
+			.where(['id', '!=', null]);
+		expect(q.build()).toBe(`bucket('users').select('id','name').where({'id','!=',bucket.Null()}).run()`);
 	});
 
 	test('not condition', () => {
@@ -109,6 +116,13 @@ describe('conditions', () => {
 			.select('id', 'total')
 			.where(bucket.Or(['status', '=', 'pending'], bucket.And(['total', '>', 100], 'Category:Electronics')));
 		expect(q.build()).toBe(`bucket('orders').select('id','total').where(bucket.Or({'status','=','pending'},bucket.And({'total','>',100},'Category:Electronics'))).run()`);
+	});
+
+	test('nested null condition', () => {
+		const q = bucket('orders')
+			.select('id', 'total')
+			.where(bucket.Not(['id', bucket.Null()]));
+		expect(q.build()).toBe(`bucket('orders').select('id','total').where(bucket.Not({'id',bucket.Null()})).run()`);
 	});
 
 	afterAll(() => {
